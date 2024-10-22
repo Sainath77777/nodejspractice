@@ -18,7 +18,10 @@ jobs:
         with:
           node-version: '16'
       - name: Shift directory
-        run: cd NodeSample/views
+        run: |
+          cd NodeSample/views
+          ls 
+          ls -al
  
       - name: Install dependencies
         run: npm install
