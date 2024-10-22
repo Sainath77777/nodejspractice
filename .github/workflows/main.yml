@@ -20,11 +20,13 @@ jobs:
       - name: Shift directory
         run: |
           cd NodeSample
-          ls 
-          ls -al
+          pwd
  
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd ./NodeSample
+          npm install
+          
  
       - name: Package Node.js services
         run: zip -r package.zip .
