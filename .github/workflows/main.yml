@@ -3,7 +3,7 @@ name: Deploy Node.js Services to AWS Lambda
 on:
   push:
     branches:
-      - main
+      - master
  
 jobs:
   build-and-deploy:
@@ -16,13 +16,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
  
       - name: Install dependencies
         run: npm install
  
       - name: Package Node.js services
-run: zip -r package.zip .
+        run: zip -r package.zip .
  
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -32,7 +32,7 @@ run: zip -r package.zip .
           aws-region: ${{ secrets.AWS_REGION }}
  
       - name: Upload to S3
-run: aws s3 cp package.zip s3://${{ secrets.S3_BUCKET_NAME }}/package.zip
+        run: aws s3 cp package.zip s3://${{ secrets.S3_BUCKET_NAME }}/package.zip
  
   update-lambda:
     needs: build-and-deploy
@@ -47,7 +47,7 @@ run: aws s3 cp package.zip s3://${{ secrets.S3_BUCKET_NAME }}/package.zip
           aws-region: ${{ secrets.AWS_REGION }}
  
       - name: Download package from S3
-run: aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/package.zip package.zip
+        run: aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/package.zip package.zip
  
       - name: Update Lambda function
         run: |
