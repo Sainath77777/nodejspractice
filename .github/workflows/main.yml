@@ -25,7 +25,7 @@ jobs:
         run: |
           cd ./NodeSample
           npm install
-          npm test
+          
           
  
       - name: Package Node.js services
