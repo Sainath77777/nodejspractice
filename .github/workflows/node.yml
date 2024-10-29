@@ -1,0 +1,41 @@
+name: Feature Branch CI/CD
+ 
+on:
+  push:
+    branches:
+      - master
+ 
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+ 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+ 
+      - name: Install dependencies
+        run: |
+          cd ./NodeSample
+          npm install
+ 
+      - name: Build Lambda package
+        run: zip -r package.zip .
+ 
+      - name: Deploy to AWS Lambda
+        run: |
+          aws s3 cp package.zip s3://${{ secrets.S3_BUCKET_NAME }}/package.zip
+          aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/package.zip package.zip
+          aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://package.zip
+          aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name dev --function-version \$LATEST
+          NEW_VERSION=$(aws lambda publish-version --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --query 'Version' --output text)
+          aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name prod --function-version $NEW_VERSION
+ 
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
