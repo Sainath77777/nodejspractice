@@ -46,6 +46,19 @@ jobs:
         run: |
           aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name dev --function-version \$LATEST
           aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
+      - name: Wait for successful update
+        id: wait_for_success
+        run: |
+          STATUS=""
+          while [ "$STATUS" != "Successful" ]; do
+            STATUS=$(aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --query 'LastUpdateStatus' --output text)
+            echo "Current status: $STATUS"
+            if [ "$STATUS" != "Successful" ]; then
+              echo "Waiting for update to complete..."
+              sleep 10  # Wait for 10 seconds before checking again
+            fi
+          done
+          aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
 
   
       - name: Publish new version
