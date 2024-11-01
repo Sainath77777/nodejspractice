@@ -39,13 +39,13 @@ jobs:
       - name: Update Lambda function code
         run: |
          aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://package.zip
-         aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
+         
 
 
       - name: Update dev alias
         run: |
           aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name dev --function-version \$LATEST
-          aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
+      
       - name: Wait for successful update
         id: wait_for_success
         run: |
@@ -58,24 +58,9 @@ jobs:
               sleep 10  # Wait for 10 seconds before checking again
             fi
           done
-          aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
-
-  
+          
       - name: Publish new version
-        id: publish
         run: |
           NEW_VERSION=$(aws lambda publish-version --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --description "New prod version" --query 'Version' --output text)
-          echo "::set-output name=new_version::$NEW_VERSION"
-  
-      - name: Retry updating prod alias
-        run: |
-          RETRY_COUNT=0
-          MAX_RETRIES=5
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name prod --function-version ${{ steps.publish.outputs.new_version }} && break
-            RETRY_COUNT=$((RETRY_COUNT+1))
-            sleep 10  # Wait for 10 seconds before retrying
-          done
-          aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
-  
+          aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name prod --function-version $NEW_VERSION
             
