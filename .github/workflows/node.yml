@@ -33,6 +33,7 @@ jobs:
           aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://package.zip
           aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name dev --function-version \$LATEST
           aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://package.zip
+          aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
           NEW_VERSION=$(aws lambda publish-version --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --description "New prod version" --query 'Version' --output text)
           aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name prod --function-version $NEW_VERSION
           
