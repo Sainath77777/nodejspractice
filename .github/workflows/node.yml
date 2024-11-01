@@ -39,10 +39,14 @@ jobs:
       - name: Update Lambda function code
         run: |
          aws lambda update-function-code --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --zip-file fileb://package.zip
+         aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
+
 
       - name: Update dev alias
         run: |
           aws lambda update-alias --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} --name dev --function-version \$LATEST
+          aws lambda get-function-configuration --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }}
+
   
       - name: Publish new version
         id: publish
