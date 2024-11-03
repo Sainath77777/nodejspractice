@@ -1,0 +1,25 @@
+name: Conditional Main Pipeline
+ 
+on:
+  push:
+    branches:
+      - master
+ 
+jobs:
+  pipeline-from-branch-1:
+    if: github.event.before == 'refs/heads/branch-1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run pipeline for merges from branch-1
+        run: echo "This pipeline runs for merges from branch-1"
+ 
+  pipeline-from-branch-2:
+    if: github.event.before == 'refs/heads/branch-2'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run pipeline for merges from branch-2
+        run: echo "This pipeline runs for merges from branch-2"
