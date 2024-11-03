@@ -7,7 +7,7 @@ on:
  
 jobs:
   pipeline-from-branch-1:
-    if: github.event.before == 'refs/heads/branch-1'
+    if: github.event.before == 'refs/heads/branch1'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -16,7 +16,7 @@ jobs:
         run: echo "This pipeline runs for merges from branch-1"
  
   pipeline-from-branch-2:
-    if: github.event.before == 'refs/heads/branch-2'
+    if: github.event.before == 'refs/heads/branch2'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
