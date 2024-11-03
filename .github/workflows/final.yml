@@ -1,25 +1,25 @@
 name: Conditional Main Pipeline
  
 on:
-  push:
+  pull_request:
     branches:
-      - master
+      - main
  
 jobs:
-  pipeline-from-branch-1:
-    if: github.event.before == 'refs/heads/branch1'
+  pipeline-from-branch1:
+    if: github.base_ref == 'main' && github.head_ref == 'branch1'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Run pipeline for merges from branch-1
-        run: echo "This pipeline runs for merges from branch-1"
+      - name: Run pipeline for merges from branch1
+        run: echo "This pipeline runs for merges from branch1"
  
-  pipeline-from-branch-2:
-    if: github.event.before == 'refs/heads/branch2'
+  pipeline-from-branch2:
+    if: github.base_ref == 'main' && github.head_ref == 'branch2'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Run pipeline for merges from branch-2
-        run: echo "This pipeline runs for merges from branch-2"
+      - name: Run pipeline for merges from branch2
+        run: echo "This pipeline runs for merges from branch2"
