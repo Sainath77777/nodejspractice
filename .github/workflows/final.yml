@@ -3,7 +3,7 @@ name: Conditional Main Pipeline
 on:
   pull_request:
     branches:
-      - main
+      - master
  
 jobs:
   pipeline-from-branch1:
