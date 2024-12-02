@@ -1,25 +1,55 @@
-name: Conditional Main Pipeline
+name: Lambda-Prod-CICD
  
 on:
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch:
  
 jobs:
-  pipeline-from-branch1:
-    if: github.base_ref == 'master' && github.head_ref == 'branch1'
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Run pipeline for merges from branch1
-        run: echo "This pipeline runs for merges from branch1"
- 
-  pipeline-from-branch2:
-    if: github.base_ref == 'master' && github.head_ref == 'branch2'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Run pipeline for merges from branch2
-        run: echo "This pipeline runs for merges from branch2"
+        uses: actions/checkout@v4
+        
+      - name: Build Lambda package
+        run: zip -r NodeSample ./NodeSample
+        
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Upload zip file to s3 bucket
+        run: aws s3 cp NodeSample.zip s3://${{ secrets.S3_BUCKET_NAME }}/NodeSample.zip
+  Deploy:
+     needs: Build
+     runs-on: ubuntu-latest
+     steps:
+       - name: Set up AWS CLI
+         uses: aws-actions/configure-aws-credentials@v1
+         with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+          
+       - name: Download zip file from s3 bucket
+         run: aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/NodeSample.zip NodeSample.zip
+         
+       - name: Publish new version
+         id: publish_version
+         run: |
+           VERSION=$(aws lambda publish-version --function-name prod1 --query 'Version' --output text)
+           echo "::set-output name=version::$VERSION"
+           
+       - name: Update or create 'prod' alias
+         run: |
+           VERSION=${{ steps.publish_version.outputs.version }}
+           ALIAS_EXISTS=$(aws lambda get-alias --function-name prod1 --name prod --query 'Name' --output text || echo "AliasNotFound")
+  
+           if [ "$ALIAS_EXISTS" = "prod" ]; then
+             aws lambda update-alias --function-name prod1 --name prod --function-version $VERSION
+           else
+             aws lambda create-alias --function-name prod1 --name prod --function-version $VERSION
+           fi
+   
