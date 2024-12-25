@@ -9,6 +9,6 @@
   "dependencies": {
     "express": "3.0.0beta7",
     "jade": "*"
-    
+    "jest": "^29.7.0"
   }
 }
