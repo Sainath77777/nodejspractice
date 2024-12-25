@@ -20,11 +20,15 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ' 18.x'
+        
     - name: Install dependancies
-      run: npm install
+      run: |
+          cd ./NodeSample
+          npm install
       
     - name: Run tests and coverage
-      run: 
+      run: |
+          cd ./NodeSample
           npm test -- --coverage
       
     - uses: sonarsource/sonarqube-scan-action@master
