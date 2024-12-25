@@ -1,0 +1,43 @@
+name: Sonar-Test
+
+on:
+  push:
+    branches: 
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with: 
+          fetch-depth: 0
+      
+    - name: Use Node.js 
+      uses: actions/setup-node@v4
+      with:
+        node-version: ' 18.x'
+    - name: Install dependancies
+      run: npm install
+      
+    - name: Run tests and coverage
+      run: 
+          npm test -- --coverage
+      
+    - uses: sonarsource/sonarqube-scan-action@master
+      env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      
+    - uses: sonarsource/sonarqube-quality-gate-action@master
+      timeout-minutes: 5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        
+    - name: Echo
+      run: echo "Hi"
